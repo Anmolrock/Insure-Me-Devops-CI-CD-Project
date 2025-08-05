@@ -1,0 +1,24 @@
+- name: Install and deploy of test and prod server
+  hosts: webserver
+  become: true
+  tasks:
+  - name: Update the apt repo
+    command: apt-get update
+  - name: Install multiple packages
+    package: name={{item}} state=present
+    loop:
+     - git
+     - docker.io
+     - openjdk-17-jdk
+  - name: start Jenkins and docker service
+    service: name={{item}} state=started
+    loop:
+    - docker
+  - name: Deploy on Test server
+    command: sudo docker run -d -P anmol792/myimage:project2
+    delegate_to: 18.117.179.135
+  - name: Perform testing on Test server
+    command: echo "Testing on Server"
+  - name: Deploy on Prod Server
+    command: sudo docker run -d -P anmol792/myimage:project2
+    delegate_to: 18.221.50.80
